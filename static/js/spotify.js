@@ -3,14 +3,13 @@ const require = createRequire(import.meta.url);
 
 import fetch from 'node-fetch';
 const request = require('request');
-
-let access_token = null;
+const fs = require('fs');
 
 async function getAccessToken() {
-    var client_id = '2e3752f95e1542e0a829a8ff35197192';
-    var client_secret = '5966f5c271c84333828298a2e39e940c';
+    const configData = await fs.promises.readFile('secret.json', 'utf8');
+    const { client_id, client_secret } = JSON.parse(configData);
 
-    var authOptions = {
+    const authOptions = {
         url: 'https://accounts.spotify.com/api/token',
         headers: {
             'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
@@ -20,39 +19,55 @@ async function getAccessToken() {
         },
         json: true
     };
+    return new Promise((resolve, reject) => {
+        request.post(authOptions, function (error, response, body) {
+            if (error || response.statusCode !== 200) {
+                reject(error || new Error(`Failed to retrieve access token, status code: ${response.statusCode}`));
+                return;
+            }
+            const access_token = body.access_token;
+            console.log(`access_token: ${access_token}`);
 
-    request.post(authOptions, function (error, response, body) {
-        if (!error && response.statusCode === 200) {
-            access_token = body.access_token;
-            console.log(`access_token: ${access_token}.`)
-        }
+            fs.writeFile('access_token.txt', access_token, function (err) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                console.log("The access token saved");
+                resolve(access_token);
+            });
+        });
     });
 }
-
-function getArtist() {
-    var id = "0TnOYISbd1XYRBk9myaseg";
-    fetch(`https://api.spotify.com/v1/artists/${id}`, {
-        headers: {
-            'Authorization': `Bearer ${access_token}`
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error(error);
+async function readAccessToken() {
+    return new Promise((resolve, reject) => {
+        fs.readFile('access_token.txt', 'utf8', function (err, data) {
+            if (err) {
+                console.error('Error reading access_token.txt:', err);
+                getAccessToken()
+                    .then(resolve)
+                    .catch(reject);
+            } else {
+                resolve(data);
+            }
         });
+    });
 }
 
 async function getRecommendationSongs(limit, market, seed_artists, seed_genres, seed_tracks, min_acousticness, max_acousticness, target_acousticness, min_danceability, max_danceability, target_danceability, min_duration_ms, max_duration_ms, target_duration_ms, min_energy, max_energy, target_energy, min_instrumentalness, max_instrumentalness, target_instrumentalness, min_key, max_key, target_key, min_liveness, max_liveness, target_liveness, min_loudness, max_loudness, target_loudness, min_mode, max_mode, target_mode, min_popularity, max_popularity, target_popularity, min_speechiness, max_speechiness, target_speechiness, min_tempo, max_tempo, target_tempo, min_time_signature, max_time_signature, target_time_signature, min_valence, max_valence, target_valence) {
     try {
+        let access_token = await readAccessToken();
+        if (access_token == null) {
+            console.log("access_token is null.");
+            return;
+        }
         var url = processGetRecommendedSongsURL(limit, market, seed_artists, seed_genres, seed_tracks, min_acousticness, max_acousticness, target_acousticness, min_danceability, max_danceability, target_danceability, min_duration_ms, max_duration_ms, target_duration_ms, min_energy, max_energy, target_energy, min_instrumentalness, max_instrumentalness, target_instrumentalness, min_key, max_key, target_key, min_liveness, max_liveness, target_liveness, min_loudness, max_loudness, target_loudness, min_mode, max_mode, target_mode, min_popularity, max_popularity, target_popularity, min_speechiness, max_speechiness, target_speechiness, min_tempo, max_tempo, target_tempo, min_time_signature, max_time_signature, target_time_signature, min_valence, max_valence, target_valence);
-        const response = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        const response = await fetch(url, { headers: { 'Authorization': `Bearer ${access_token}` } });
         const data = await response.json();
+        console.log(data)
         return data;
     } catch (error) {
-        if (error.message === 'The access token expired' || error.message === 'Invalid access token') {
+        if (error.message === 'The access token expired') {
             console.log(`${error.message}. Try again.`)
             getAccessToken().then(() => {
                 getRecommendationSongs(limit, market, seed_artists, seed_genres, seed_tracks, min_acousticness, max_acousticness, target_acousticness, min_danceability, max_danceability, target_danceability, min_duration_ms, max_duration_ms, target_duration_ms, min_energy, max_energy, target_energy, min_instrumentalness, max_instrumentalness, target_instrumentalness, min_key, max_key, target_key, min_liveness, max_liveness, target_liveness, min_loudness, max_loudness, target_loudness, min_mode, max_mode, target_mode, min_popularity, max_popularity, target_popularity, min_speechiness, max_speechiness, target_speechiness, min_tempo, max_tempo, target_tempo, min_time_signature, max_time_signature, target_time_signature, min_valence, max_valence, target_valence);
@@ -151,34 +166,40 @@ function processGetRecommendedSongsURL(limit, market, seed_artists, seed_genres,
         }
         _url += "max_energy=" + encodeURIComponent("" + max_energy) + "&";
     }
-    if ((target_energy !== undefined && target_energy !== null) && (target_energy < 0 || target_energy > 1)) {
-        throw new Error("The parameter 'target_energy' must be a number between 0 and 1.");
-    } else if (target_energy !== undefined) {
+    if (target_energy !== undefined && target_energy !== null) {
+        if (target_energy < 0 || target_energy > 1) {
+            throw new Error("The parameter 'target_energy' must be a number between 0 and 1.");
+        }
         _url += "target_energy=" + encodeURIComponent("" + target_energy) + "&";
     }
-    if ((min_instrumentalness !== undefined && min_instrumentalness !== null) && (min_instrumentalness < 0 || min_instrumentalness > 1)) {
-        throw new Error("The parameter 'min_instrumentalness' must be a number between 0 and 1.");
-    } else if (min_instrumentalness !== undefined) {
+    if (min_instrumentalness !== undefined && min_instrumentalness !== null) {
+        if (min_instrumentalness < 0 || min_instrumentalness > 1) {
+            throw new Error("The parameter 'min_instrumentalness' must be a number between 0 and 1.");
+        }
         _url += "min_instrumentalness=" + encodeURIComponent("" + min_instrumentalness) + "&";
     }
-    if ((max_instrumentalness !== undefined && max_instrumentalness !== null) && (max_instrumentalness < 0 || max_instrumentalness > 1)) {
-        throw new Error("The parameter 'max_instrumentalness' must be a number between 0 and 1.");
-    } else if (max_instrumentalness !== undefined) {
+    if (max_instrumentalness !== undefined && max_instrumentalness !== null) {
+        if (max_instrumentalness < 0 || max_instrumentalness > 1) {
+            throw new Error("The parameter 'max_instrumentalness' must be a number between 0 and 1.");
+        }
         _url += "max_instrumentalness=" + encodeURIComponent("" + max_instrumentalness) + "&";
     }
-    if ((target_instrumentalness !== undefined && target_instrumentalness !== null) && (target_instrumentalness < 0 || target_instrumentalness > 1)) {
-        throw new Error("The parameter 'target_instrumentalness' must be a number between 0 and 1.");
-    } else if (target_instrumentalness !== undefined) {
+    if (target_instrumentalness !== undefined && target_instrumentalness !== null) {
+        if (target_instrumentalness < 0 || target_instrumentalness > 1) {
+            throw new Error("The parameter 'target_instrumentalness' must be a number between 0 and 1.");
+        }
         _url += "target_instrumentalness=" + encodeURIComponent("" + target_instrumentalness) + "&";
     }
-    if ((min_key !== undefined && min_key !== null) && (min_key < 0 || min_key > 11)) {
-        throw new Error("The parameter 'min_key' must be an integer between 0 and 11.");
-    } else if (min_key !== undefined) {
+    if (min_key !== undefined && min_key !== null) {
+        if (min_key < 0 || min_key > 11) {
+            throw new Error("The parameter 'min_key' must be an integer between 0 and 11.");
+        }
         _url += "min_key=" + encodeURIComponent("" + min_key) + "&";
     }
-    if ((max_key !== undefined && max_key !== null) && (max_key < 0 || max_key > 11)) {
-        throw new Error("The parameter 'max_key' must be an integer between 0 and 11.");
-    } else if (max_key !== undefined) {
+    if (max_key !== undefined && max_key !== null) {
+        if (max_key < 0 || max_key > 11) {
+            throw new Error("The parameter 'max_key' must be an integer between 0 and 11.");
+        }
         _url += "max_key=" + encodeURIComponent("" + max_key) + "&";
     }
     if (target_key !== undefined && target_key !== null) {
@@ -335,6 +356,7 @@ function processGetRecommendedSongsURL(limit, market, seed_artists, seed_genres,
 
     return _url;
 }
+
 var limit = null;
 var market = null;
 var seed_artists = null;
