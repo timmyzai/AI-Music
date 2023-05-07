@@ -1,0 +1,58 @@
+Explanation:
+Angry: High-energy and fast-tempo music with low valence is associated with anger.
+Disgusted: Heavy and aggressive music with low energy and low valence can evoke disgust.
+Fearful: Dark and slow music with low energy, low valence, and high instrumentalness can create a fearful atmosphere.
+Happy: Upbeat and danceable music with high energy and high valence can convey happiness.
+Neutral: Calm and relaxing music with moderate energy and valence is neutral.
+Sad: Slow and melancholic music with low energy, low valence, and high acousticness can express sadness.
+Surprised: Unpredictable and experimental music with high energy and high valence can evoke surprise.
+
+Angry:
+- seed_genres: "metal", "punk"
+- min_energy: 0.7
+- max_valence: 0.3
+- min_tempo: 120
+- max_tempo: 180
+
+Disgusted:
+- seed_genres: "heavy-metal", "grindcore", "death-metal"
+- max_energy: 0.5
+- target_acousticness: 0.5
+- max_valence: 0.4
+
+Fearful:
+- seed_genres: "dark-ambient", "horror-soundtracks", "drone"
+- max_tempo: 80
+- target_energy: 0.3
+- target_valence: 0.3
+- max_instrumentalness: 0.9
+
+Happy:
+- seed_genres: "pop", "dance", "disco"
+- target_valence: 0.8
+- min_energy: 0.7
+- min_danceability: 0.7
+
+Neutral:
+- seed_genres: "ambient", "classical", "instrumental"
+- target_valence: 0.5
+- max_energy: 0.5
+- target_acousticness: 0.5
+
+Sad:
+- seed_genres: "blues", "indie-folk", "sad"
+- target_valence: 0.2
+- max_energy: 0.4
+- target_acousticness: 0.7
+- min_tempo: 60
+- max_tempo: 120
+
+Surprised:
+- seed_genres: "experimental", "avant-garde", "eclectic"
+- target_energy: 0.8
+- target_valence: 0.7
+- min_tempo: 100
+- max_tempo: 160
+- min_instrumentalness: 0.5
+
+
