@@ -1,4 +1,3 @@
-import asyncio
 import json
 import base64
 import re
@@ -77,8 +76,12 @@ class rec_song_input_dto:
         self.target_valence = target_valence
 
 async def get_access_token():
-    with open(SECRET_FILE) as f:
-        config_data = json.load(f)
+    try:
+        with open(SECRET_FILE) as f:
+            config_data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Secret token required")
+    config_data = {}
     client_id = config_data['client_id']
     client_secret = config_data['client_secret']
 

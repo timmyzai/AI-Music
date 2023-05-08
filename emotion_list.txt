@@ -1,0 +1,4 @@
+Raw Emotion List: ['Angry', 'Surprised', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry']
+Processed Emotion Data: Angry: 94.44%, Surprised: 5.56%
+Final Emotion: Angry
+2023-05-08T17:26:13.474484
