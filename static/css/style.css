@@ -22,6 +22,10 @@ h1 {
   text-align: center;
 }
 
+#emotion-detector{
+  display: none;
+}
+
 h2 {
   font-family: 'Bigelow Rules';
   font-size: 36px;

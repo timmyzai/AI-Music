@@ -440,6 +440,6 @@ async def main(emotion: str):
         raise ValueError(f"Invalid emotion: {emotion}. Please choose from: {', '.join(emotion_dict.values())}")
     param = process_rec_song_input(emotion)
     # print(json.dumps(param.__dict__, indent=4))
-    await get_recommendation_songs(param)
+    result = await get_recommendation_songs(param)
+    return result
 
-asyncio.run(main("Fearful"))

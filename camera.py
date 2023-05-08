@@ -67,8 +67,6 @@ class VideoCamera(object):
         image = cv2.resize(image, (600, 500))
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         face_rects = face_cascade.detectMultiScale(gray, 1.3, 5)
-        df1 = pd.read_csv(music_dist[show_text[0]])[['Name', 'Album', 'Artist']]
-        df1 = df1.head(15)
         emotions_results = self.get_emotions(gray, face_rects)
         face_info_results = self.get_face_info(image, face_rects)
         
@@ -76,7 +74,8 @@ class VideoCamera(object):
             pass
         last_frame1 = image.copy()
         jpeg = self._encode_image(last_frame1)
-        return jpeg, df1
+        emotion = emotion_dict[show_text[0]]
+        return jpeg, emotion
 
     def _read_frame(self):
         ret, image = self.webcam.read()
@@ -118,8 +117,4 @@ class VideoCamera(object):
     def _encode_image(self, image):
         jpeg = cv2.imencode('.jpg', image)
         return jpeg[1].tobytes()
-
-def music_rec():
-    df = pd.read_csv(music_dist[show_text[0]])
-    df = df[['Name', 'Album', 'Artist']]
-    return df.head(15)
+    

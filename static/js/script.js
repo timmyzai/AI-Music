@@ -1,21 +1,25 @@
-setInterval(function() {
-  $.getJSON('/t', function(data) {
-      CreateHtmlTable(data);
-  });
-  return false;
-}, 3000);
+function startWebcam() {
+  let emotionDetectorDiv = document.getElementById('emotion-detector');
+  let videoContainerDiv = emotionDetectorDiv.querySelector('.video-container');
+  let imgElement = document.createElement('img');
+  imgElement.classList.add('outer-shadow');
+  imgElement.setAttribute('id', 'bg');
+  imgElement.setAttribute('class', 'center img-fluid');
+  imgElement.setAttribute('src', "/video_feed");
+  videoContainerDiv.appendChild(imgElement);
 
-function CreateHtmlTable(data) {
-$("#ResultArea").html("");  
-var table = $("<table class='table table-striped table-light table-bordered table-hover table-sm table-responsive' id='DynamicTable'></table>").appendTo("#ResultArea");
-var rowHeader = $("<tr></tr>").appendTo(table);
-$("<td></td>").text("Name").appendTo(rowHeader);
-$("<td></td>").text("Album").appendTo(rowHeader);
-$("<td></td>").text("Artist").appendTo(rowHeader);
-$.each(data, function (i, value) {
-    var row = $("<tr></tr>").appendTo(table);
-    $("<td></td>").text(value.Name).appendTo(row);
-    $("<td></td>").text(value.Album).appendTo(row);
-    $("<td></td>").text(value.Artist).appendTo(row);
-});
+  emotionDetectorDiv.style.display = 'block';
+
+  setTimeout(function() {
+    emotionDetectorDiv.style.display = 'none';
+    videoContainerDiv.removeChild(imgElement);
+
+    // fetch('/get_emotion').then(function(response) {
+    //   return response.text();
+    // }).then(function(emotion) {
+    //   console.log(emotion);
+    //   // document.getElementById('emotion-input').value = emotion;
+    //   // document.getElementById('emotion-form').submit();
+    // });
+  }, 5500);
 }
