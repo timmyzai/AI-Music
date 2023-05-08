@@ -1,3 +1,4 @@
+# import asyncio
 import json
 import base64
 import re
@@ -79,40 +80,40 @@ async def get_access_token():
     try:
         with open(SECRET_FILE) as f:
             config_data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: Secret token required")
-    config_data = {}
-    client_id = config_data['client_id']
-    client_secret = config_data['client_secret']
+            client_id = config_data['client_id']
+            client_secret = config_data['client_secret']
 
-    auth_header = base64.b64encode(
-        f"{client_id}:{client_secret}".encode('ascii')).decode('ascii')
+        auth_header = base64.b64encode(
+            f"{client_id}:{client_secret}".encode('ascii')).decode('ascii')
 
-    auth_options = {
-        'url': 'https://accounts.spotify.com/api/token',
-        'headers': {
-            'Authorization': f'Basic {auth_header}'
-        },
-        'form': {
-            'grant_type': 'client_credentials'
+        auth_options = {
+            'url': 'https://accounts.spotify.com/api/token',
+            'headers': {
+                'Authorization': f'Basic {auth_header}'
+            },
+            'form': {
+                'grant_type': 'client_credentials'
+            }
         }
-    }
 
-    response = requests.post(
-        auth_options['url'], headers=auth_options['headers'], data=auth_options['form'])
-    response_data = response.json()
+        response = requests.post(
+            auth_options['url'], headers=auth_options['headers'], data=auth_options['form'])
+        response_data = response.json()
 
-    if response.status_code != 200:
-        raise Exception(
-            f"Failed to retrieve access token, status code: {response.status_code}")
+        if response.status_code != 200:
+            raise Exception(
+                f"Failed to retrieve access token, status code: {response.status_code}")
 
-    access_token = response_data['access_token']
+        access_token = response_data['access_token']
 
-    with open(ACCESS_TOKEN_FILE, 'w') as f:
-        f.write(f"{access_token}\n{datetime.now().isoformat()}")
+        with open(ACCESS_TOKEN_FILE, 'w') as f:
+            f.write(f"{access_token}\n{datetime.now().isoformat()}")
 
-    print(f"access_token: {access_token}")
-    return access_token
+        print(f"access_token: {access_token}")
+        return access_token
+
+    except FileNotFoundError:
+        raise Exception(f"Error: Secret token required")
 
 async def read_access_token():
     try:
@@ -446,3 +447,4 @@ async def main(emotion: str):
     result = await get_recommendation_songs(param)
     return result
 
+# asyncio.run(main("Fearful"))

@@ -20,11 +20,28 @@ def index():
 def get_rec_songs():
     emotion = request.args.get('emotion')
     result = asyncio.run(spotify.main(emotion))
-    return render_rec_songs_template(result)
+    return render_rec_songs_template(result, emotion)
+
+def render_rec_songs_template(result, emotion = None):
+    return render_template('index.html', emotion_dict=spotify.emotion_dict, rec_songs=result, emotion=emotion)
 
 @app.route('/video_feed')
 def video_feed():
     return Response(gen(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def gen(camera):
+    global emotions
+    emotions = []
+    start_time = time.time()
+    while True:
+        if time.time() - start_time > 5:
+            camera.stop_capture()
+            break
+        frame, emotion = next(camera)
+        emotions.append(emotion)
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        time.sleep(0.05) # Add a small delay to reduce CPU usage
 
 @app.route('/get_emotion')
 def get_emotion():
@@ -44,20 +61,6 @@ def get_emotion():
         f.write(f"Final Emotion: {final_emotion}\n{datetime.now().isoformat()}")
 
     return final_emotion
-
-def gen(camera):
-    global emotions
-    emotions = []
-    while True:
-        frame, emotion = camera.get_frame()
-        emotions.append(emotion)
-        yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        time.sleep(0.05) # Add a small delay to reduce CPU usage
-  
-
-def render_rec_songs_template(result):
-    return render_template('rec_songs.html', emotion_dict=spotify.emotion_dict, rec_songs=result)
 
 if __name__ == '__main__':
     app.debug = True

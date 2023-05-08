@@ -1,4 +1,8 @@
 function startWebcam() {
+  const recSongsList = document.querySelector('#rec-songs-list');
+  if (recSongsList) {
+    recSongsList.innerHTML = '';
+  }
   let emotionDetectorDiv = document.getElementById('emotion-detector');
   let videoContainerDiv = emotionDetectorDiv.querySelector('.video-container');
   let imgElement = document.createElement('img');
@@ -18,7 +22,7 @@ function startWebcam() {
       return response.text();
     }).then(function(emotion) {
       document.getElementById('emotion-input').value = emotion;
-      document.getElementById('emotion-form').submit();
+      document.getElementById('emotion-webcam-form').submit();
     });
   }, 5000);
 }

@@ -30,7 +30,6 @@ emotion_model.load_weights('model.h5')
 cv2.ocl.setUseOpenCL(False)
 
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
-music_dist = {0: "songs/angry.csv", 1: "songs/disgusted.csv ", 2: "songs/fearful.csv", 3: "songs/happy.csv", 4: "songs/neutral.csv", 5: "songs/sad.csv", 6: "songs/surprised.csv"}
 global last_frame1
 last_frame1 = np.zeros((480, 640, 3), dtype=np.uint8)
 show_text = [0]
@@ -39,6 +38,9 @@ class WebcamVideoStream:
     def __init__(self):
         self.stream = cv2.VideoCapture(0)
         self.stopped = False
+        
+    def __del__(self):
+        self.stream = None
 
     def start(self):
         Thread(target=self.update, args=()).start()
@@ -57,9 +59,19 @@ class WebcamVideoStream:
 class VideoCamera(object):
     def __init__(self):
         self.webcam = WebcamVideoStream()
+        self.capture_frames = True
 
     def __del__(self):
         self.webcam.stop()
+    
+    def __next__(self):
+        if self.capture_frames:
+            return self.get_frame()
+        else:
+            raise StopIteration
+        
+    def stop_capture(self):
+        self.capture_frames = False
 
     def get_frame(self):
         image = self._read_frame()

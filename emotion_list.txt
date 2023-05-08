@@ -1,4 +1,4 @@
-Raw Emotion List: ['Angry', 'Surprised', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry']
-Processed Emotion Data: Angry: 94.44%, Surprised: 5.56%
+Raw Emotion List: ['Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Angry', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised', 'Surprised']
+Processed Emotion Data: Angry: 59.38%, Surprised: 40.62%
 Final Emotion: Angry
-2023-05-08T17:26:13.474484
+2023-05-08T20:06:24.148007

@@ -19,6 +19,9 @@
     {% for key, value in emotion_dict.items() %}
     <button name="emotion" value="{{ value }}" type="submit">{{ value }}</button>
     {% endfor %}
+  </form>
+  <form id="emotion-webcam-form" action="{{ url_for('get_rec_songs') }}" method="GET">
+    <label for="emotion">Click "Start" to detect your facial expression:</label>
     <button id="start-button" type="button" onclick="startWebcam()">Start</button>
     <input type="hidden" id="emotion-input" name="emotion" value="">
   </form>
@@ -31,16 +34,20 @@
 
   {% if rec_songs %}
   {% if rec_songs['tracks'] %}
-  <h2>Recommendations for {{ emotion }}:</h2>
-  <ul>
+  <h2>Recommendations for {{ emotion }} songs:</h2>
+  <ul id="rec-songs-list">
     {% for track in rec_songs['tracks'] %}
     <li>{{ track['name'] }} by {{ track['artists'][0]['name'] }}</li>
     {% endfor %}
   </ul>
   {% else %}
-  <p>No recommendations found.</p>
+  <p>No track found.</p>
   {% endif %}
+  {% else %}
+  <p>No list found.</p>
   {% endif %}
+
+
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
