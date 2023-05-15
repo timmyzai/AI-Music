@@ -63,16 +63,22 @@ class VideoCamera(object):
 
     def __del__(self):
         self.webcam.stop()
-    
+
     def __next__(self):
         if self.capture_frames:
             return self.start_capture()
         else:
             self.webcam.stop()
             raise StopIteration
-        
+
     def stop_capture(self):
         self.capture_frames = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.webcam.stop()
 
     def start_capture(self):
         image = self._read_frame()

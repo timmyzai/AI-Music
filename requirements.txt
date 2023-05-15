@@ -9,3 +9,4 @@ numpy
 Pillow
 tensorflow
 flask_cors
+flask[async]

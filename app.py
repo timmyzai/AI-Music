@@ -3,7 +3,7 @@ from collections import Counter
 from datetime import datetime
 import time
 from flask import Flask, Response, render_template, request
-from camera import *
+from camera import VideoCamera
 import spotify.spotify as spotify
 
 EMOTION_LIST_FILE = 'emotion_list.txt'
@@ -24,24 +24,29 @@ def render_rec_songs_template(result, emotion = None):
     return render_template('index.html', emotion_dict=spotify.emotion_dict, rec_songs=result, emotion=emotion)
 
 @app.route('/video_feed')
-async def video_feed():
-    async for frame in gen_frames( VideoCamera()):
-        return Response(frame, mimetype='multipart/x-mixed-replace; boundary=frame')
+def video_feed():
+    with VideoCamera() as camera:
+        return Response(generate_frames(camera),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def gen_frames(camera):
+def generate_frames(camera):
+    capture_time = 3
+    start_time = time.monotonic()
     emotions = []
-    start_time = time.time()
     while True:
-        if time.time() - start_time > 5:
-            camera.stop_capture()
-            write_emotions_data_to_file(emotions)
-            break
         frame, emotion = next(camera)
+        elapsed_time = time.monotonic() - start_time
+        if elapsed_time >= capture_time:
+            camera.stop_capture()
+            break
         emotions.append(emotion)
         yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        time.sleep(0.05) # Add a small delay to reduce CPU usage
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        time.sleep(0.05)  # Add a small delay to reduce CPU usage
         
+    print("Capture stopped.")
+    write_emotions_data_to_file(emotions)
+    print("Emotions data stored.")
+    
 def write_emotions_data_to_file(emotions):
     counter = Counter(emotions)
     total_emotions = len(emotions)
@@ -72,4 +77,3 @@ def get_emotion():
 if __name__ == '__main__':
     app.debug = True
     app.run()
-    
