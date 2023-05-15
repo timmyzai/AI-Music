@@ -2,14 +2,12 @@ import asyncio
 from collections import Counter
 from datetime import datetime
 import time
-import traceback
 from flask import Flask, Response, render_template, request
 from camera import *
 import spotify.spotify as spotify
 
 EMOTION_LIST_FILE = 'emotion_list.txt'
 app = Flask(__name__)
-emotions = []
 
 @app.route('/')
 def index():
@@ -26,26 +24,25 @@ def render_rec_songs_template(result, emotion = None):
     return render_template('index.html', emotion_dict=spotify.emotion_dict, rec_songs=result, emotion=emotion)
 
 @app.route('/video_feed')
-def video_feed():
-    return Response(gen(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+async def video_feed():
+    async for frame in gen_frames( VideoCamera()):
+        return Response(frame, mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def gen(camera):
-    global emotions
+def gen_frames(camera):
     emotions = []
     start_time = time.time()
     while True:
         if time.time() - start_time > 5:
             camera.stop_capture()
+            write_emotions_data_to_file(emotions)
             break
         frame, emotion = next(camera)
         emotions.append(emotion)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         time.sleep(0.05) # Add a small delay to reduce CPU usage
-
-@app.route('/get_emotion')
-def get_emotion():
-    global emotions
+        
+def write_emotions_data_to_file(emotions):
     counter = Counter(emotions)
     total_emotions = len(emotions)
     emotion_data = []
@@ -60,11 +57,19 @@ def get_emotion():
         f.write(f"Processed Emotion Data: {', '.join(emotion_data)}\n")
         f.write(f"Final Emotion: {final_emotion}\n{datetime.now().isoformat()}")
 
+@app.route('/get_emotion')
+def get_emotion():
+    final_emotion = ""
+    with open(EMOTION_LIST_FILE, 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            if line.startswith('Final Emotion'):
+                final_emotion = line.split(':')[-1].strip()
+            else:
+                raise RuntimeError("Final emotion not found in file")
     return final_emotion
 
 if __name__ == '__main__':
     app.debug = True
-    try:
-        app.run()
-    except SystemExit as e:
-        traceback.print_exc()
+    app.run()
+    

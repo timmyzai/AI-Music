@@ -66,14 +66,15 @@ class VideoCamera(object):
     
     def __next__(self):
         if self.capture_frames:
-            return self.get_frame()
+            return self.start_capture()
         else:
+            self.webcam.stop()
             raise StopIteration
         
     def stop_capture(self):
         self.capture_frames = False
 
-    def get_frame(self):
+    def start_capture(self):
         image = self._read_frame()
         self._display_frame(image)
         image = cv2.resize(image, (600, 500))

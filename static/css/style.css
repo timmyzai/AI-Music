@@ -6,13 +6,6 @@ body {
   background: #eff0f4;
 }
 
-h1 {
-  font-family: 'Bigelow Rules';
-  font-size: 72px;
-  color: #0ccac4;
-  text-align: center;
-}
-
 .emotion-detector {
   width: 50%;
   float: left;
@@ -22,9 +15,9 @@ h1 {
   text-align: center;
 }
 
-#emotion-detector{
+/* #emotion-detector{
   display: none;
-}
+} */
 
 h2 {
   font-family: 'Bigelow Rules';
@@ -44,25 +37,7 @@ img {
   width: 85%;
 }
 
-.song-recommendations {
-  width: 50%;
-  float: left;
-  height: 100%;
-  margin: auto;
-  text-align: center;
-}
-
 .outer-shadow {
   --outer-shadow: 3px 3px 3px #d0d0d0, -3px -3px 3px #f8f8f8;
   box-shadow: var(--outer-shadow);
-}
-
-.result-area {
-  padding: 15px;
-  width: 49%;
-  float: left;
-  height: 100%;
-  margin: auto;
-  text-align: center;
-  margin-bottom: 15px;
 }

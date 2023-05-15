@@ -1,0 +1,14 @@
+{% if rec_songs %}
+  {% if rec_songs['tracks'] %}
+    <h2>Recommendations for {{ emotion }} songs:</h2>
+    <ul id="rec-songs-list">
+      {% for track in rec_songs['tracks'] %}
+      <li>{{ track['name'] }} by {{ track['artists'][0]['name'] }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No track found.</p>
+  {% endif %}
+{% else %}
+  <p>No list found.</p>
+{% endif %}

@@ -3,11 +3,13 @@ import json
 import base64
 import re
 import json
+import traceback
 import requests
 import urllib.parse
 from datetime import datetime
 
 ACCESS_TOKEN_FILE = 'spotify/access_token.txt'
+API_RESULT_FILE = 'spotify/api_result.txt'
 SECRET_FILE = 'secret.json'
 EMOTION_SONG_ATTRIBUTE_FILE = 'spotify/emotion-song-attribute/emotion-song-attribute.json'
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
@@ -127,7 +129,8 @@ async def read_access_token():
                 return access_token
             else:
                 raise Exception('Access token has expired')
-    except (FileNotFoundError, ValueError, Exception):
+    except Exception as e:
+        traceback.print_exc()
         pass
     return await get_access_token()
 
@@ -135,15 +138,19 @@ async def get_recommendation_songs(input_params: rec_song_input_dto):
     try:
         access_token = await read_access_token()
         url = process_get_recommended_songs_url(input_params)
-        print("Going to get data from " + url)
         response = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
         response.raise_for_status()
         data = response.json()
-        print(data)
+        await write_api_result_to_file(input_params, data)
         return data
     except Exception as error:
         print(error)
-            
+        
+async def write_api_result_to_file(input_params, data):
+    with open(API_RESULT_FILE, 'a') as f:
+        f.write(f"Processed Parameters: {json.dumps(input_params.__dict__, indent=4)}\n")
+        f.write(f"API Response: {json.dumps(data, indent=4)}\n")
+
 def process_get_recommended_songs_url(input: rec_song_input_dto):
     url = "https://api.spotify.com/v1/recommendations?"
     limit = input.limit
@@ -442,9 +449,9 @@ def process_rec_song_input(emotion: str):
 async def main(emotion: str):
     if emotion not in emotion_dict.values():
         raise ValueError(f"Invalid emotion: {emotion}. Please choose from: {', '.join(emotion_dict.values())}")
+    print(f"Input Emotion: {emotion}")
     param = process_rec_song_input(emotion)
-    # print(json.dumps(param.__dict__, indent=4))
     result = await get_recommendation_songs(param)
     return result
 
-# asyncio.run(main("Fearful"))
+# asyncio.run(main("Angry"))

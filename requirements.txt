@@ -2,7 +2,10 @@ Flask
 spotipy
 pandas
 gunicorn
+numpy
+opencv-python
 opencv_python_headless
 numpy
 Pillow
 tensorflow
+flask_cors
