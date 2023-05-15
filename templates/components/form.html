@@ -1,18 +1,17 @@
-<div>
-  <label for="emotion-select">How are you feeling?</label>
-  <select id="emotion-select">
+<form id="emotion-form" action="{{ url_for('get_rec_songs') }}" method="GET">
+  <div>
+    <label>Choose emotions</label><br>
     {% for key, value in emotion_dict.items() %}
-    <option value="{{ value }}">{{ value }}</option>
+    <button type="submit" name="emotion" value="{{ value }}">{{ value }}</button>
     {% endfor %}
-  </select>
+  </div>
+</form>
+
+<form id="webcam-emotion-form" action="{{ url_for('get_rec_songs') }}" method="GET">
+  <label for="emotion-input">Emotion from webcam:</label>
+  <input type="text" id="emotion-input" name="emotion" value="None" required readonly>
   <button id="start-emotion-detector" type="button" onclick="startWebcam()">Detect by Webcam</button>
   <div id="loading-indicator" style="display:none">Detecting emotion...</div>
-</div>
-
-<form id="emotion-form" action="{{ url_for('get_rec_songs') }}" method="GET">
-  <label for="selected-emotion">Your Emotion:</label>
-  <input type="text" id="selected-emotion" name="emotion" required readonly>
-  <button type="submit">Get Recommendations</button>
 </form>
 
 <div class="emotion-detector" id="emotion-detector">

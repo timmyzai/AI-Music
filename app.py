@@ -8,6 +8,7 @@ import spotify.spotify as spotify
 
 EMOTION_LIST_FILE = 'emotion_list.txt'
 app = Flask(__name__)
+stop_video = False
 
 @app.route('/')
 def index():
@@ -29,20 +30,15 @@ def video_feed():
         return Response(generate_frames(camera),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def generate_frames(camera):
-    capture_time = 3
-    start_time = time.monotonic()
+    global stop_video
     emotions = []
-    while True:
+    while not stop_video:
         frame, emotion = next(camera)
-        elapsed_time = time.monotonic() - start_time
-        if elapsed_time >= capture_time:
-            camera.stop_capture()
-            break
         emotions.append(emotion)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         time.sleep(0.05)  # Add a small delay to reduce CPU usage
-        
+    camera.stop_capture()    
     print("Capture stopped.")
     write_emotions_data_to_file(emotions)
     print("Emotions data stored.")
@@ -62,16 +58,21 @@ def write_emotions_data_to_file(emotions):
         f.write(f"Processed Emotion Data: {', '.join(emotion_data)}\n")
         f.write(f"Final Emotion: {final_emotion}\n{datetime.now().isoformat()}")
 
+def stop_video_feed():
+    global stop_video
+    stop_video = True
+
 @app.route('/get_emotion')
 def get_emotion():
+    stop_video_feed()
     final_emotion = ""
     with open(EMOTION_LIST_FILE, 'r') as f:
         lines = f.readlines()
         for line in lines:
             if line.startswith('Final Emotion'):
                 final_emotion = line.split(':')[-1].strip()
-            else:
-                raise RuntimeError("Final emotion not found in file")
+        if final_emotion == '':     
+            raise RuntimeError("Final emotion not found in file")
     return final_emotion
 
 if __name__ == '__main__':

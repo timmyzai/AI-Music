@@ -10,10 +10,10 @@
             "justMyCode": false
         },
         {
-            "name": "test.py",
+            "name": "testWebcamWithEmotion.py",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/test.py",
+            "program": "${workspaceFolder}/testWebcamWithEmotion.py",
             "console": "integratedTerminal",
             "justMyCode": false
         }
